@@ -243,34 +243,39 @@ const App = () => {
     gsap.set(noBtnRef.current, { clearProps: "all" });
   };
 
-  const handleShare = async () => {
+const handleShare = async () => {
     if (!captureRef.current) return;
     try {
-      const canvas = await html2canvas(captureRef.current, {
-        scale: 2,
+      // Create the image
+      const canvas = await html2canvas(captureRef.current, { 
+        scale: 2, 
         backgroundColor: null,
+        useCORS: true 
       });
+
       canvas.toBlob(async (blob) => {
         if (!blob) return;
-        const file = new File([blob], "our-valentine.png", {
-          type: "image/png",
-        });
+
+        const file = new File([blob], "our-valentine-moment.png", { type: "image/png" });
         const shareData = {
-          title: "Valentine Answer",
-          text: "Look what happened! 💖",
           files: [file],
         };
+
+        // Try Native Share (Works on Mobile for WhatsApp)
         if (navigator.canShare && navigator.canShare(shareData)) {
           await navigator.share(shareData);
         } else {
+          // Fallback for Desktop (Download)
           const link = document.createElement("a");
           link.href = canvas.toDataURL("image/png");
-          link.download = "our-valentine.png";
+          link.download = "our-valentine-moment.png";
           link.click();
+          alert("Image saved! Open WhatsApp and send it to him! 💖");
         }
       });
     } catch (err) {
       console.error("Sharing failed:", err);
+      alert("Oops! Sharing failed. Try taking a screenshot manually!");
     }
   };
 
